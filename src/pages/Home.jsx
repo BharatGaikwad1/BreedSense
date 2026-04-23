@@ -100,15 +100,15 @@ export default function Home() {
               milking capacity, physical traits, origin, and more — powered by advanced AI.
             </p>
 
-            <div className="flex items-center justify-center gap-3 mt-8">
-              <a href="#upload-section">
-                <Button size="lg" className="gap-2 gradient-primary text-white border-0 hover:opacity-90 shadow-lg shadow-emerald-500/20">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 w-full sm:w-auto px-4 sm:px-0">
+              <a href="#upload-section" className="w-full sm:w-auto">
+                <Button size="lg" className="gap-2 w-full sm:w-auto gradient-primary text-white border-0 hover:opacity-90 shadow-lg shadow-emerald-500/20">
                   <ScanLine className="w-5 h-5" />
                   Identify Now
                 </Button>
               </a>
-              <Link to="/breeds">
-                <Button size="lg" variant="outline" className="gap-2">
+              <Link to="/breeds" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
                   <BookOpen className="w-5 h-5" />
                   Browse Breeds
                 </Button>

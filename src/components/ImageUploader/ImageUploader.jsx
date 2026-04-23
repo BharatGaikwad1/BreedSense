@@ -38,11 +38,13 @@ export default function ImageUploader({ onSubmit, isLoading, cooldownUntil }) {
     [handleFile]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] },
     maxFiles: 1,
     disabled: isLoading,
+    noClick: false,
+    noKeyboard: false,
   });
 
   const handleCameraCapture = (capturedFile) => {
@@ -113,13 +115,16 @@ export default function ImageUploader({ onSubmit, isLoading, cooldownUntil }) {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="gap-2"
-                      onClick={(e) => e.stopPropagation()}
+                      className="gap-2 w-full sm:w-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        open();
+                      }}
                     >
                       <ImageIcon className="w-4 h-4" />
                       Browse Files
@@ -128,7 +133,7 @@ export default function ImageUploader({ onSubmit, isLoading, cooldownUntil }) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowCamera(true);
