@@ -3,7 +3,7 @@ import { formatResult } from '@/utils/formatResult';
 
 export async function predict(imageFile) {
   const formData = new FormData();
-  formData.append('image', imageFile);
+  formData.append('file', imageFile);
 
   const response = await api.post('/predict', formData, {
     headers: {

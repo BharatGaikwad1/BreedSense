@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MapPin, Milk, Weight, Leaf, Shield, Heart, Thermometer, Wheat, Home as HomeIcon, AlertTriangle, Download, Share2 } from 'lucide-react';
+import { MapPin, Milk, Weight, Leaf, Shield, Heart, Thermometer, Wheat, Home as HomeIcon, AlertTriangle, Download, Share2, Zap, BarChart3, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -90,13 +90,19 @@ export default function ResultCard({ result, imageUrl }) {
           <div className={cn('px-6', imageUrl ? '-mt-16 relative z-10' : 'pt-6')}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <Badge variant={result.animalType === 'cow' ? 'success' : 'info'}>
                     {result.animalType === 'cow' ? '🐄 Cow' : '🐃 Buffalo'}
                   </Badge>
                   <Badge variant="outline" className={confidence.color}>
                     {confidencePercent}% {confidence.label}
                   </Badge>
+                  {result.inferenceTime && (
+                    <Badge variant="secondary" className="text-[10px] gap-1">
+                      <Clock className="w-3 h-3" />
+                      {result.inferenceTime}ms
+                    </Badge>
+                  )}
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
                   {result.breedName}
@@ -136,6 +142,34 @@ export default function ResultCard({ result, imageUrl }) {
           </motion.div>
         )}
 
+        {/* Top-5 Predictions from the model */}
+        {result.top5 && result.top5.length > 1 && (
+          <motion.div variants={itemVariants} className="px-6 pt-4">
+            <p className="text-xs text-muted-foreground font-medium mb-2 flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5" />
+              Top Predictions
+            </p>
+            <div className="space-y-1.5">
+              {result.top5.slice(0, 5).map((pred, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground w-4">#{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between text-xs mb-0.5">
+                      <span className={cn('font-medium truncate', i === 0 && 'text-primary')}>{pred.breed || pred.breed_name || pred.label}</span>
+                      <span className="text-muted-foreground ml-2 shrink-0">{typeof pred.confidence === 'number' ? `${(pred.confidence * 100).toFixed(1)}%` : pred.confidence}</span>
+                    </div>
+                    <Progress
+                      value={typeof pred.confidence === 'number' ? pred.confidence * 100 : parseFloat(pred.confidence)}
+                      className="h-1"
+                      indicatorClassName={i === 0 ? 'bg-primary' : 'bg-muted-foreground/40'}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Description */}
         <motion.div variants={itemVariants}>
           <CardContent className="pt-4">
@@ -158,18 +192,22 @@ export default function ResultCard({ result, imageUrl }) {
 
               <TabsContent value="milking" className="mt-4">
                 <div className="space-y-0">
-                  <InfoRow icon={Milk} label="Daily Yield" value={result.milkingCapacity.dailyYield ? `${result.milkingCapacity.dailyYield} liters/day` : null} />
+                  <InfoRow icon={Milk} label="Avg Daily Yield" value={result.milkingCapacity.dailyYield ? `${result.milkingCapacity.dailyYield} liters/day` : null} />
+                  <InfoRow icon={Zap} label="Peak Daily Yield" value={result.milkingCapacity.peakYield ? `${result.milkingCapacity.peakYield} liters/day` : null} />
                   <InfoRow icon={Leaf} label="Lactation Period" value={result.milkingCapacity.lactationPeriod ? `${result.milkingCapacity.lactationPeriod} days` : null} />
                   <InfoRow icon={Thermometer} label="Fat Content" value={result.milkingCapacity.fatContent ? `${result.milkingCapacity.fatContent}%` : null} />
-                  <InfoRow icon={Milk} label="Annual Yield" value={result.milkingCapacity.annualYield ? `${result.milkingCapacity.annualYield} liters/year` : null} />
+                  <InfoRow icon={Thermometer} label="SNF Content" value={result.milkingCapacity.snf ? `${result.milkingCapacity.snf}%` : null} />
+                  <InfoRow icon={Milk} label="Yield per Lactation" value={result.milkingCapacity.annualYield ? `${result.milkingCapacity.annualYield} liters` : null} />
+                  <InfoRow icon={Milk} label="Yield Range" value={result.milkingCapacity.range || null} />
                 </div>
               </TabsContent>
 
               <TabsContent value="physical" className="mt-4">
                 <div className="space-y-0">
-                  <InfoRow icon={Weight} label="Average Weight" value={result.physicalAttributes.averageWeight} />
+                  <InfoRow icon={Weight} label="Body Size" value={result.physicalAttributes.averageWeight} />
                   <InfoRow icon={Heart} label="Coat Color" value={result.physicalAttributes.color} />
-                  <InfoRow icon={Shield} label="Horn Type" value={result.physicalAttributes.horns} />
+                  <InfoRow icon={Shield} label="Distinctive Features" value={result.physicalAttributes.horns} />
+                  <InfoRow icon={Shield} label="Hump" value={result.physicalAttributes.hump} />
                   <InfoRow icon={Leaf} label="Lifespan" value={result.physicalAttributes.lifespan ? `${result.physicalAttributes.lifespan} years` : null} />
                 </div>
               </TabsContent>
@@ -177,9 +215,11 @@ export default function ResultCard({ result, imageUrl }) {
               <TabsContent value="utility" className="mt-4">
                 <div className="space-y-0">
                   <InfoRow icon={Shield} label="Primary Use" value={result.utility.primaryUse} />
-                  <InfoRow icon={Thermometer} label="Adaptability" value={result.utility.adaptability} />
+                  <InfoRow icon={Shield} label="Secondary Use" value={result.utility.secondaryUse} />
                   <InfoRow icon={Heart} label="Temperament" value={result.utility.temperament} />
+                  <InfoRow icon={Thermometer} label="Adaptability" value={result.utility.adaptability} />
                   <InfoRow icon={Shield} label="Disease Resistance" value={result.utility.diseaseResistance} />
+                  <InfoRow icon={Leaf} label="Conservation Status" value={result.utility.conservationStatus} />
                 </div>
               </TabsContent>
 
@@ -195,6 +235,16 @@ export default function ResultCard({ result, imageUrl }) {
             </Tabs>
           </CardContent>
         </motion.div>
+
+        {/* Model info footer */}
+        {result.modelUsed && (
+          <motion.div variants={itemVariants} className="px-6 pb-4">
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground/60 pt-2 border-t border-border/30">
+              <span>Model: {result.modelUsed}</span>
+              {result.inferenceTime && <span>Inference: {result.inferenceTime}ms</span>}
+            </div>
+          </motion.div>
+        )}
       </Card>
     </motion.div>
   );

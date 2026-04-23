@@ -52,7 +52,7 @@ export default function BreedCard({ breed, onClick, index = 0 }) {
               {breed.animal_type === 'cow' ? '🐄 Cow' : '🐃 Buffalo'}
             </Badge>
             <Badge variant="outline" className="text-[10px]">
-              {breed.utility?.primary_use || 'Dairy'}
+              {breed.primary_use || breed.utility?.primary_use || 'Dairy'}
             </Badge>
           </div>
 
@@ -62,19 +62,19 @@ export default function BreedCard({ breed, onClick, index = 0 }) {
 
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3" />
-            {breed.origin}
+            {typeof breed.origin === 'object' ? breed.origin?.state || 'Unknown' : breed.origin}
           </div>
 
           <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
             {breed.description}
           </p>
 
-          {breed.milking_capacity?.daily_yield_liters && (
+          {(breed.milking_capacity?.avg_daily_yield_litres || breed.milking_capacity?.daily_yield_liters) && (
             <div className="pt-2 border-t border-border/50">
               <p className="text-xs text-muted-foreground">
-                🥛 {breed.milking_capacity.daily_yield_liters} L/day
-                {breed.milking_capacity.fat_content_percent &&
-                  ` • ${breed.milking_capacity.fat_content_percent}% fat`}
+                🥛 {breed.milking_capacity.avg_daily_yield_litres || breed.milking_capacity.daily_yield_liters} L/day
+                {(breed.milking_capacity.fat_percentage || breed.milking_capacity.fat_content_percent) &&
+                  ` • ${breed.milking_capacity.fat_percentage || breed.milking_capacity.fat_content_percent}% fat`}
               </p>
             </div>
           )}
