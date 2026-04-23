@@ -9,7 +9,11 @@ export async function predict(imageFile) {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 60000, // prediction can take up to 60s on cold-start HF Spaces
   });
 
-  return formatResult(response.data);
+  // Debug: log raw response to help diagnose data mapping issues
+  console.log('[BreedSense] Raw API response:', JSON.stringify(response.data, null, 2));
+
+  return formatResult(response.data.prediction);
 }
